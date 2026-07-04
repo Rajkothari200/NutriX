@@ -57,6 +57,16 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CORS middleware - allow Flutter app and web frontend from any origin
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 
@@ -1542,7 +1552,7 @@ def get_user_analytics(user_id: int, db: Session = Depends(get_db)):
 @app.get("/api/analytics/{user_id}/history")
 def get_user_analytics_history(
     user_id: int,
-    metric_name: str,
+    metric_name: str = "calories_weekly_avg",
     limit: int = 30,
     db: Session = Depends(get_db)
 ):
@@ -1866,7 +1876,7 @@ def generate_recipe_instructions(payload: Dict[str, Any], db: Session = Depends(
     """
 
     # Call Gemini API using httpx
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
         "contents": [{
@@ -1982,7 +1992,7 @@ def ai_coach(req: CoachChatRequest):
         "parts": [{"text": req.message}]
     })
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
         "contents": contents,
@@ -2041,7 +2051,7 @@ def ai_diet_plan(req: DietPlanRequest, db: Session = Depends(get_db)):
         return {"plan": f"Dynamic AI Onboarding Diet Plan generated locally:\n\nBreakfast: Oats with almonds and banana (~450 kcal)\nLunch: Grilled chicken breast with brown rice and broccoli (~600 kcal)\nDinner: Tofu/Paneer stir-fry with mixed vegetables (~450 kcal)\nSnacks: Greek yogurt with honey (~200 kcal)\n\nAdjusted calories to meet your target goal of {target_calories} kcal."}
 
     import httpx
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
         "contents": [{"parts": [{"text": prompt}]}],
@@ -2082,7 +2092,7 @@ def ai_recipe_generator(req: RecipeGeneratorRequest):
         return {"recipe": f"Simulated Recipe based on ingredients: {req.ingredients}\n\nRecipe Name: Healthy Homely Stir-fry\nPrep Time: 15 mins\nInstructions:\n1. Chop ingredients.\n2. Heat a non-stick pan.\n3. Toss in ingredients and stir cook for 10 minutes.\nMacros: ~350 kcal | 20g Protein | 30g Carbs | 12g Fats"}
 
     import httpx
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
         "contents": [{"parts": [{"text": prompt}]}],
